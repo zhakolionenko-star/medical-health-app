@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../theme/colors';
 
@@ -9,8 +8,7 @@ interface Clinic {
   name: string;
   address: string;
   hours: string;
-  latitude: number;
-  longitude: number;
+  coords: string;
 }
 
 const CLINICS: Clinic[] = [
@@ -19,16 +17,14 @@ const CLINICS: Clinic[] = [
     name: 'AZD Орталық Клиника',
     address: 'Абай даңғылы, 45',
     hours: '08:00 – 20:00',
-    latitude: 43.2415,
-    longitude: 76.9254,
+    coords: '43.2415, 76.9254',
   },
   {
     id: '2',
     name: 'AZD Диагностика Орталығы',
     address: 'Достық даңғылы, 92',
     hours: '08:00 – 21:00',
-    latitude: 43.2565,
-    longitude: 76.9574,
+    coords: '43.2565, 76.9574',
   },
 ];
 
@@ -47,33 +43,21 @@ export const MapScreen: React.FC<Props> = ({ onBack }) => {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.mapWrapper}>
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 43.2485,
-            longitude: 76.941,
-            latitudeDelta: 0.04,
-            longitudeDelta: 0.04,
-          }}
-        >
-          {CLINICS.map((c) => (
-            <Marker
-              key={c.id}
-              coordinate={{ latitude: c.latitude, longitude: c.longitude }}
-              title={c.name}
-              description={c.address}
-            />
-          ))}
-        </MapView>
-      </View>
+      {Platform.OS === 'web' && (
+        <View style={styles.webNotice}>
+          <Text style={styles.webNoticeText}>
+            Веб-нұсқада клиникалардың мекенжайлары мен координаттары көрсетілген.
+          </Text>
+        </View>
+      )}
 
-      <ScrollView style={styles.list}>
+      <ScrollView style={styles.list} contentContainerStyle={{ paddingBottom: 24 }}>
         {CLINICS.map((c) => (
           <View key={c.id} style={styles.clinicCard}>
             <Text style={styles.clinicName}>{c.name}</Text>
             <Text style={styles.clinicInfo}>Мекенжайы: {c.address}</Text>
             <Text style={styles.clinicInfo}>Жұмыс уақыты: {c.hours}</Text>
+            <Text style={styles.clinicCoords}>Координаттар: {c.coords}</Text>
           </View>
         ))}
       </ScrollView>
@@ -85,7 +69,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.surfaceBlue,
-    paddingTop: 44,
+    paddingTop: 24,
   },
   header: {
     flexDirection: 'row',
@@ -100,20 +84,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.primary,
   },
-  mapWrapper: {
-    height: 260,
+  webNotice: {
+    backgroundColor: COLORS.primaryLight,
     margin: 16,
-    borderRadius: 18,
-    overflow: 'hidden',
+    marginBottom: 4,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  map: {
-    width: '100%',
-    height: '100%',
+  webNoticeText: {
+    color: COLORS.primary,
+    fontSize: 13,
+    fontWeight: '600',
   },
   list: {
-    paddingHorizontal: 16,
+    padding: 16,
   },
   clinicCard: {
     backgroundColor: COLORS.white,
@@ -132,5 +118,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 4,
+  },
+  clinicCoords: {
+    fontSize: 12,
+    color: COLORS.textPrimary,
+    marginTop: 6,
+    fontWeight: '600',
   },
 });
